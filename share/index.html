@@ -340,6 +340,10 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin-left:auto}
 
   <!-- ===== 분석 ===== -->
   <div id="tab-report" class="tab-content">
+    <div class="card">
+      <div class="sec-title">카테고리별 지출 그래프</div>
+      <div class="chart-box"><canvas id="catChartR"></canvas></div>
+    </div>
     <div class="card tape">
       <div class="sec-title">카테고리별 상세</div>
       <div id="catDetail"><div class="empty">아직 지출이 없어요</div></div>
@@ -423,7 +427,7 @@ const PASTELS=['#6E7657','#BC7B5C','#B99B4F','#9A8FA6','#7E96A0','#C9A68A','#8A9
 let data=null, dataSha=null;
 let curMonth='';
 
-let chart=null, pinBuf='', memoCtx=null, payOcrResults=[];
+let chart=null, chartR=null, pinBuf='', memoCtx=null, payOcrResults=[];
 
 function $(id){return document.getElementById(id)}
 function fmt(n){return new Intl.NumberFormat('ko-KR',{style:'currency',currency:'KRW',minimumFractionDigits:0}).format(n||0)}
@@ -598,13 +602,21 @@ function renderPayHistory(m){
 }
 function renderChart(m){
   const sums={};m.expenses.forEach(e=>sums[e.category]=(sums[e.category]||0)+e.amount);
-  const labels=Object.keys(sums).filter(k=>sums[k]>0);
-  const ctx=$('catChart').getContext('2d');
-  if(chart)chart.destroy();
-  chart=new Chart(ctx,{type:'doughnut',
-    data:{labels:labels.map(dispSrc),datasets:[{data:labels.map(l=>sums[l]),backgroundColor:PASTELS,borderColor:'rgba(250,248,243,.9)',borderWidth:3}]},
-    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
-      plugins:{legend:{position:'bottom',labels:{padding:14,font:{family:'Pretendard',size:11}}}}}});
+  const items=Object.entries(sums).filter(x=>x[1]>0).sort((a,b)=>b[1]-a[1]);
+  const labels=items.map(x=>dispSrc(x[0]));
+  const vals=items.map(x=>x[1]);
+  chart=makeBar('catChart',labels,vals,chart);
+  if($('catChartR'))chartR=makeBar('catChartR',labels,vals,chartR);
+}
+function makeBar(id,labels,vals,old){
+  if(old)old.destroy();
+  return new Chart($(id).getContext('2d'),{type:'bar',
+    data:{labels,datasets:[{data:vals,backgroundColor:PASTELS.slice(0,vals.length),borderRadius:9,borderSkipped:false,maxBarThickness:34}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:c=>fmt(c.parsed.y)}}},
+      scales:{
+        x:{ticks:{font:{family:'Pretendard',size:10},maxRotation:60,minRotation:40},grid:{display:false}},
+        y:{beginAtZero:true,ticks:{font:{family:'Pretendard',size:10},callback:v=>v>=10000?Math.round(v/10000)+'만':v},grid:{color:'rgba(63,59,51,.08)'}}}}});
 }
 function renderReport(m){
   const sums={},total=m.expenses.reduce((s,e)=>s+e.amount,0);
@@ -627,6 +639,7 @@ function switchTab(name,btn){
   document.querySelectorAll('.tab-content').forEach(el=>el.classList.remove('active'));
   document.querySelectorAll('.bottom-nav button').forEach(el=>el.classList.remove('active'));
   $('tab-'+name).classList.add('active');btn.classList.add('active');
+  if(name==='home'||name==='report')setTimeout(()=>renderChart(M()),30);
 }
 function addExpense(){
   const date=$('exDate').value,amount=parseInt($('exAmount').value),
