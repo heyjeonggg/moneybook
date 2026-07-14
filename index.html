@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>그린라임맘의 한달</title>
+<title>그린 라임맘의 한 달</title>
 <meta name="theme-color" content="#E9E4DA">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
@@ -11,11 +11,14 @@
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon-192.png">
 <link rel="icon" href="icon-192.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=IBM+Plex+Sans+KR:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
+@font-face{font-family:'Pretendard';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Regular.woff2') format('woff2');font-weight:400;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Medium.woff2') format('woff2');font-weight:500;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-SemiBold.woff2') format('woff2');font-weight:600;font-display:swap}
+@font-face{font-family:'Pretendard';src:url('https://cdn.jsdelivr.net/gh/projectnoonnu/pretendard@1.0/Pretendard-Bold.woff2') format('woff2');font-weight:700;font-display:swap}
+@font-face{font-family:'OwnglyphPositive';src:url('fonts/Ownglyph_Positive.ttf') format('truetype');font-weight:normal;font-display:swap}
+
 :root{
   --bg:#E9E4DA; --ink:#3F3B33; --ink-soft:#8B8578;
   --glass:rgba(255,255,255,.44); --glass-strong:rgba(255,255,255,.6);
@@ -31,7 +34,7 @@
 *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
 html{font-size:16px}
 body{
-  font-family:'IBM Plex Sans KR',sans-serif;color:var(--ink);min-height:100vh;
+  font-family:'Pretendard',sans-serif;color:var(--ink);min-height:100vh;
   background:
     radial-gradient(60% 40% at 15% 8%, rgba(168,176,150,.55), transparent 70%),
     radial-gradient(50% 35% at 90% 20%, rgba(201,166,138,.5), transparent 70%),
@@ -46,7 +49,7 @@ button{font-family:inherit;cursor:pointer}
 input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
 /* header */
 .header{display:flex;align-items:flex-end;justify-content:space-between;padding:14px 4px 18px}
-.title h1{font-family:'Gowun Batang',serif;font-weight:700;font-size:1.55rem;line-height:1.2;letter-spacing:-.01em}
+.title h1{font-family:'OwnglyphPositive','Pretendard',sans-serif;font-weight:400;font-size:2rem;line-height:1.2;letter-spacing:-.01em}
 .title p{font-size:.68rem;color:var(--ink-soft);margin-top:5px;letter-spacing:.22em}
 .sync{display:flex;align-items:center;gap:6px}
 .sync-chip{font-size:.7rem;letter-spacing:.04em;background:var(--glass);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
@@ -58,7 +61,7 @@ input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
 .monthbar{display:flex;align-items:center;justify-content:center;gap:8px;margin-bottom:16px}
 .monthbar button{background:var(--glass);border:1px solid var(--glass-border);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);
   border-radius:999px;width:36px;height:36px;font-size:.8rem;color:var(--ink)}
-.monthbar .label{font-family:'Gowun Batang',serif;font-size:1.35rem;min-width:150px;text-align:center;letter-spacing:.02em}
+.monthbar .label{font-family:'Pretendard',sans-serif;font-size:1.35rem;min-width:150px;text-align:center;letter-spacing:.02em}
 /* cards */
 .card{background:var(--glass);backdrop-filter:blur(20px) saturate(1.15);-webkit-backdrop-filter:blur(20px) saturate(1.15);
   border-radius:24px;padding:22px;margin-bottom:14px;border:1px solid var(--glass-border);
@@ -72,7 +75,7 @@ input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
   background:var(--glass);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);
   box-shadow:0 8px 24px rgba(63,59,51,.06)}
 .stat .lb{font-size:.66rem;letter-spacing:.14em;color:var(--ink-soft);margin-bottom:8px}
-.stat .vl{font-family:'Gowun Batang',serif;font-size:1.5rem;font-weight:700;word-break:keep-all;letter-spacing:-.01em}
+.stat .vl{font-family:'Pretendard',sans-serif;font-size:1.5rem;font-weight:700;word-break:keep-all;letter-spacing:-.01em}
 .stat .sb{font-size:.68rem;color:var(--ink-soft);margin-top:6px}
 .stats .stat:first-child{grid-column:1/-1;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,.3))}
 .stats .stat:first-child .vl{font-size:2.3rem}
@@ -81,7 +84,7 @@ input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
 /* rows */
 .rowline{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);font-size:.9rem}
 .rowline:last-child{border-bottom:none}
-.rowline .k{color:var(--ink-soft)} .rowline .v{font-family:'Gowun Batang',serif;font-weight:700}
+.rowline .k{color:var(--ink-soft)} .rowline .v{font-family:'Pretendard',sans-serif;font-weight:700}
 .rowline .v.pink{color:var(--clay-deep)} .rowline .v.green{color:var(--accent-deep)}
 .chart-box{position:relative;height:260px}
 /* forms */
@@ -107,7 +110,7 @@ input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
 .chip{font-size:.64rem;letter-spacing:.06em;padding:3px 9px;border-radius:999px;background:rgba(110,118,87,.14);color:var(--accent-deep)}
 .chip.src{background:rgba(154,143,166,.16);color:var(--mauve)}
 .item .right{text-align:right;display:flex;flex-direction:column;gap:5px;align-items:flex-end}
-.item .amt{font-family:'Gowun Batang',serif;font-weight:700;color:var(--clay-deep);white-space:nowrap}
+.item .amt{font-family:'Pretendard',sans-serif;font-weight:700;color:var(--clay-deep);white-space:nowrap}
 .item .amt.plus{color:var(--accent-deep)}
 .item .bal{font-size:.66rem;color:var(--ink-soft);border-top:1px solid var(--line);padding-top:4px}
 .item.pay-charge{background:rgba(110,118,87,.1)}
@@ -140,7 +143,7 @@ input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
 .screen.open{display:flex}
 .screen .inner{width:100%;max-width:400px;text-align:center;background:var(--glass);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);
   border:1px solid var(--glass-border);border-radius:28px;padding:34px 26px;box-shadow:0 16px 40px rgba(63,59,51,.12)}
-.screen h2{font-family:'Gowun Batang',serif;font-size:1.5rem;margin-bottom:8px}
+.screen h2{font-family:'OwnglyphPositive','Pretendard',sans-serif;font-size:1.9rem;margin-bottom:8px}
 .screen p{font-size:.83rem;color:var(--ink-soft);margin-bottom:18px;line-height:1.6}
 .pin-dots{display:flex;justify-content:center;gap:14px;margin:18px 0}
 .pin-dots span{width:13px;height:13px;border-radius:50%;border:1.5px solid var(--accent);display:inline-block}
@@ -191,7 +194,7 @@ input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
 
 <div class="wrap" id="app" style="display:none">
   <div class="header">
-    <div class="title"><h1>그린라임맘의 한달</h1><p>MONEYBOOK · 현명한 소비, 행복한 가정</p></div>
+    <div class="title"><h1>그린 라임맘의 한 달</h1><p>MONEYBOOK · 현명한 소비, 행복한 가정</p></div>
     <div class="sync">
       <span class="sync-chip" id="syncChip">준비 중</span>
       <button class="icon-btn" onclick="manualRefresh()" title="새로고침">↻</button>
@@ -635,7 +638,7 @@ function renderChart(m){
   chart=new Chart(ctx,{type:'doughnut',
     data:{labels,datasets:[{data:labels.map(l=>sums[l]),backgroundColor:PASTELS,borderColor:'rgba(250,248,243,.9)',borderWidth:3}]},
     options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
-      plugins:{legend:{position:'bottom',labels:{padding:14,font:{family:'IBM Plex Sans KR',size:11}}}}}});
+      plugins:{legend:{position:'bottom',labels:{padding:14,font:{family:'Pretendard',size:11}}}}}});
 }
 function renderReport(m){
   const sums={},total=m.expenses.reduce((s,e)=>s+e.amount,0);
