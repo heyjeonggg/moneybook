@@ -440,6 +440,9 @@ function $(id){return document.getElementById(id)}
 function fmt(n){return new Intl.NumberFormat('ko-KR',{style:'currency',currency:'KRW',minimumFractionDigits:0}).format(n||0)}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
+function tKey(x){return x.date+'T'+(x.time||'00:00')+'#'+(x.id||'')}
+function sortAsc(a){return [...a].sort((x,y)=>tKey(x).localeCompare(tKey(y)))}
+function sortDesc(a){return sortAsc(a).reverse()}
 async function sha256(s){const b=await crypto.subtle.digest('SHA-256',new TextEncoder().encode(s));return[...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,'0')).join('')}
 function localDate(){const d=new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0')}
 
@@ -597,11 +600,11 @@ function expItem(e,idx,compact){
     </div></div>`;
 }
 function renderRecent(m){
-  const s=[...m.expenses].sort((a,b)=>b.date.localeCompare(a.date)).slice(0,5);
+  const s=sortDesc(m.expenses).slice(0,5);
   $('recentList').innerHTML=s.length?s.map(e=>expItem(e,0,true)).join(''):'<div class="empty">아직 지출이 없어요</div>';
 }
 function renderExpenses(m){
-  const s=[...m.expenses].sort((a,b)=>b.date.localeCompare(a.date));
+  const s=sortDesc(m.expenses);
   $('expenseList').innerHTML=s.length?s.map(e=>expItem(e)).join(''):'<div class="empty">아직 지출이 없어요</div>';
 }
 function renderAdditional(m){
@@ -614,10 +617,10 @@ function renderAdditional(m){
 }
 function renderPayHistory(m){
   const tx=[];
-  m.charges.forEach(c=>tx.push({date:c.date,type:'charge',amount:c.amount,bonus:Math.floor(c.amount*0.1),name:'파주페이 충전',id:c.id,memo:c.memo||''}));
-  m.expenses.filter(e=>e.source==='파주페이').forEach(e=>tx.push({date:e.date,type:'use',amount:e.amount,name:e.merchant,cat:e.category,id:e.id,memo:e.memo||''}));
+  m.charges.forEach(c=>tx.push({date:c.date,time:c.time||'',type:'charge',amount:c.amount,bonus:Math.floor(c.amount*0.1),name:'파주페이 충전',id:c.id,memo:c.memo||''}));
+  m.expenses.filter(e=>e.source==='파주페이').forEach(e=>tx.push({date:e.date,time:e.time||'',type:'use',amount:e.amount,name:e.merchant,cat:e.category,id:e.id,memo:e.memo||''}));
   if(!tx.length){$('payHistory').innerHTML='<div class="empty">아직 거래가 없어요</div>';return}
-  tx.sort((a,b)=>a.date.localeCompare(b.date));
+  tx.sort((a,b)=>tKey(a).localeCompare(tKey(b)));
   let bal=m.carryover;
   tx.forEach(t=>{bal+= t.type==='charge'?t.amount+t.bonus:-t.amount;t.bal=bal});
   tx.reverse();
@@ -776,6 +779,8 @@ function parsePayText(text){
     const dm=line.match(/20\d{2}\/\d{2}\/\d{2}/);
     if(!dm)continue;
     const date=dm[0].replace(/\//g,'-');
+    const tmch=(line+' '+next).match(/\b(\d{1,2}:\d{2})\b/);
+    const time=tmch?tmch[1].padStart(5,'0'):'';
     const isCharge=next.includes('충전')||next.includes('모바일');
     const isUse=next.includes('결제')&&!isCharge;
     if(!isCharge&&!isUse)continue;
@@ -785,7 +790,7 @@ function parsePayText(text){
       const am=lines[j].match(/([0-9]{1,3}(?:,[0-9]{3})*|[0-9]+)\s*원?/);
       if(am){const v=parseInt(am[1].replace(/,/g,''));if(v>1000&&v<10000000){amount=v;break}}
     }
-    if(amount>0)out.push({date,type:isCharge?'charge':'use',amount});
+    if(amount>0)out.push({date,time,type:isCharge?'charge':'use',amount});
   }
   return out;
 }
@@ -802,7 +807,7 @@ async function runPayOcr(){
     ocrStatus(st,`✅ ${payOcrResults.length}건 인식했어요 — 아래에서 확인 후 저장!`,true);
     const pv=$('payOcrPrev');pv.style.display='block';
     pv.innerHTML=payOcrResults.map(t=>`
-      <div class="rowline"><span class="k">${t.date} ${t.type==='charge'?'📥 충전':'🛍 사용'}</span>
+      <div class="rowline"><span class="k">${t.date}${t.time?' '+t.time:''} ${t.type==='charge'?'📥 충전':'🛍 사용'}</span>
       <span class="v">${fmt(t.amount)}</span></div>`).join('');
     $('payOcrSave').style.display='block';
   }catch(e){ocrStatus(st,'❌ 인식에 실패했어요',false)}
@@ -811,8 +816,8 @@ function savePayOcr(){
   if(!payOcrResults.length)return;
   const m=M();let c=0,u=0;
   payOcrResults.forEach(t=>{
-    if(t.type==='charge'){m.charges.push({id:uid(),date:t.date,amount:t.amount,memo:''});c++}
-    else{m.expenses.push({id:uid(),date:t.date,amount:t.amount,category:'파주페이',merchant:'파주페이 사용',source:'파주페이',memo:''});u++}
+    if(t.type==='charge'){m.charges.push({id:uid(),date:t.date,time:t.time||'',amount:t.amount,memo:''});c++}
+    else{m.expenses.push({id:uid(),date:t.date,time:t.time||'',amount:t.amount,category:'파주페이',merchant:'파주페이 사용',source:'파주페이',memo:''});u++}
   });
   payOcrResults=[];$('payOcrPrev').style.display='none';$('payOcrSave').style.display='none';$('payOcrFile').value='';
   commit();toast(`저장 완료! 충전 ${c}건 · 사용 ${u}건`);
