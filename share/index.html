@@ -219,8 +219,6 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin-left:auto}
     <div class="card tape">
       <div class="sec-title">예산 분류</div>
       <div class="rowline"><span class="k">기본 예산</span><span class="v" id="bBase">0원</span></div>
-      <div class="rowline"><span class="k" style="padding-left:14px">운영 예산</span><span class="v" id="bOp" onclick="editBudget('operating','bOp')" style="cursor:pointer;border-bottom:1px dashed var(--line)">0원</span></div>
-      <div class="rowline"><span class="k" style="padding-left:14px">세이프박스</span><span class="v" id="bSafe" onclick="editBudget('safebox','bSafe')" style="cursor:pointer;border-bottom:1px dashed var(--line)">0원</span></div>
       <div class="rowline" id="bAddRow" style="display:none"><span class="k">추가 예산</span><span class="v pink" id="bAdd">0원</span></div>
       <div style="margin-top:12px">
         <div class="frow">
@@ -264,8 +262,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin-left:auto}
         <div class="ig"><label>카테고리</label><select id="exCategory"></select></div>
         <div class="ig"><label>어느 예산에서?</label>
           <select id="exSource">
-            <option value="운영">운영 예산</option><option value="세이프박스">세이프박스</option>
-            <option value="추가">추가 예산</option><option value="파주페이"><span class="payname">지역페이</span></option>
+            <option value="운영">기본 예산</option>            <option value="추가">추가 예산</option><option value="파주페이"><span class="payname">지역페이</span></option>
           </select>
         </div>
       </div>
@@ -394,9 +391,7 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin-left:auto}
 <div class="modal" id="budgetModal">
   <div class="box">
     <div class="sec-title">월간 예산 수정</div>
-    <div class="ig"><label>기본 예산 (운영 + 세이프박스)</label><input type="number" id="mBase" inputmode="numeric"></div>
-    <div class="ig"><label>운영 예산</label><input type="number" id="mOp" inputmode="numeric"></div>
-    <div class="ig"><label>세이프박스</label><input type="number" id="mSafe" inputmode="numeric"></div>
+    <div class="ig"><label>한 달 기본 예산</label><input type="number" id="mBase" inputmode="numeric"></div>
     <div style="display:flex;gap:8px;margin-top:8px">
       <button class="btn btn-main" style="flex:1" onclick="saveBudget()">저장</button>
       <button class="btn btn-soft" style="flex:1" onclick="closeModal('budgetModal')">취소</button>
@@ -434,7 +429,7 @@ function fmt(n){return new Intl.NumberFormat('ko-KR',{style:'currency',currency:
 function fmtN(n){return n?Number(n).toLocaleString('ko-KR'):''}
 function num(id){return parseInt(($(id).value||'').replace(/[^0-9]/g,''))||0}
 function moneyInputs(){
- ['exAmount','addAmount','carryInput','pcAmount','puAmount','mBase','mOp','mSafe'].forEach(id=>{
+ ['exAmount','addAmount','carryInput','pcAmount','puAmount','mBase'].forEach(id=>{
    const el=$(id);if(!el)return;
    el.type='text';el.inputMode='numeric';el.autocomplete='off';
    el.addEventListener('input',()=>{const v=el.value.replace(/[^0-9]/g,'');el.value=v?Number(v).toLocaleString('ko-KR'):''});
@@ -550,7 +545,7 @@ function renderAll(){
   $('vAddNote').textContent=t.add>0?`(추가 ${fmt(t.add)} 포함)`:'';
   $('vUsed').textContent=fmt(t.used);$('vLeft').textContent=fmt(t.left);$('vRate').textContent=t.rate+'%';
   $('vPayChg').textContent=fmt(p.charges);$('vPayBal').textContent=fmt(p.balance);
-  $('bBase').textContent=fmt(m.baseBudget);$('bOp').textContent=fmt(m.operating);$('bSafe').textContent=fmt(m.safebox);
+  $('bBase').textContent=fmt(m.baseBudget);
   $('bAddRow').style.display=t.add>0?'flex':'none';$('bAdd').textContent=fmt(t.add);
   $('pCarry').textContent=fmt(p.carryover);$('pChg').textContent=fmt(p.charges);$('pBonus').textContent=fmt(p.bonus);
   $('pUsed').textContent=fmt(p.used);$('pBal').textContent=fmt(p.balance);
@@ -711,31 +706,14 @@ function saveMemoModal(){
 }
 /* 예산 모달 */
 function openBudgetModal(){
-  const m=M();$('mBase').value=fmtN(m.baseBudget);$('mOp').value=fmtN(m.operating);$('mSafe').value=fmtN(m.safebox);
+  const m=M();$('mBase').value=fmtN(m.baseBudget);
   $('budgetModal').classList.add('open');
 }
 function saveBudget(){
-  const b=num('mBase'),o=num('mOp'),s=num('mSafe');
-  if(!b||!o||!s){toast('모든 값을 입력해주세요');return}
-  const m=M();m.baseBudget=b;m.operating=o;m.safebox=s;
+  const b=num('mBase');
+  if(!b){toast('예산을 입력해주세요');return}
+  const m=M();m.baseBudget=b;m.operating=b;m.safebox=0;
   closeModal('budgetModal');commit();toast('예산을 저장했어요 ✓');
-}
-function editBudget(field,elId){
-  const m=M(),cur=field==='safebox'?m.safebox:m.operating;
-  const el=$(elId);if(!el)return;
-  const inp=document.createElement('input');
-  inp.type='text';inp.inputMode='numeric';inp.value=fmtN(cur);
-  inp.style.cssText='width:130px;padding:6px 10px;border:1px solid var(--accent);border-radius:8px;text-align:right;font-size:.9rem;background:#fff';
-  el.replaceWith(inp);inp.focus();inp.select();
-  inp.addEventListener('input',()=>{const v=inp.value.replace(/[^0-9]/g,'');inp.value=v?Number(v).toLocaleString('ko-KR'):''});
-  let saved=false;
-  const done=()=>{if(saved)return;saved=true;
-    const v=parseInt(inp.value.replace(/[^0-9]/g,''))||0;
-    if(field==='safebox')m.safebox=v;else m.operating=v;
-    m.baseBudget=m.operating+m.safebox;
-    commit();toast('예산을 수정했어요 ✓')};
-  inp.addEventListener('blur',done);
-  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur()});
 }
 function closeModal(id){$(id).classList.remove('open')}
 
