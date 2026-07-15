@@ -594,13 +594,13 @@ function renderPayHistory(m){
         <div class="n" style="color:var(--mint-deep)">${t.name}${t.memo?` <span style="font-size:.75em;opacity:.7">(${t.memo})</span>`:''}</div></div>
       <div class="right"><div class="amt plus">+${fmt(t.amount)}</div>
         <div style="font-size:.7rem;color:var(--mint-deep)">보너스 +${fmt(t.bonus)}</div>
-        <div class="bal">남은: ${fmt(t.bal)}</div>
+        
         <div style="display:flex;gap:4px"><button class="btn-mini" onclick="openMemo('${t.id}','charge')">메모</button>
         <button class="btn-mini danger" onclick="delCharge('${t.id}')">삭제</button></div></div></div>`
     :`<div class="item pay-use"><div class="info"><div class="d">${t.date}</div>
         <div class="n">${t.name}${t.memo?` <span style="font-size:.75em;opacity:.7">(${t.memo})</span>`:''}</div>
         <div class="meta"><span class="chip">${dispSrc(t.cat)}</span></div></div>
-      <div class="right"><div class="amt">-${fmt(t.amount)}</div><div class="bal">남은: ${fmt(t.bal)}</div>
+      <div class="right"><div class="amt">-${fmt(t.amount)}</div>
         <div style="display:flex;gap:4px"><button class="btn-mini" onclick="openMemo('${t.id}')">메모</button>
         <button class="btn-mini danger" onclick="delExpense('${t.id}')">삭제</button></div></div></div>`
   ).join('');
