@@ -219,8 +219,8 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin-left:auto}
     <div class="card tape">
       <div class="sec-title">예산 분류</div>
       <div class="rowline"><span class="k">기본 예산</span><span class="v" id="bBase">0원</span></div>
-      <div class="rowline"><span class="k" style="padding-left:14px">운영 예산</span><span class="v" id="bOp">0원</span></div>
-      <div class="rowline"><span class="k" style="padding-left:14px">세이프박스</span><span class="v" id="bSafe">0원</span></div>
+      <div class="rowline"><span class="k" style="padding-left:14px">운영 예산</span><span class="v" id="bOp" onclick="editBudget('operating','bOp')" style="cursor:pointer;border-bottom:1px dashed var(--line)">0원</span></div>
+      <div class="rowline"><span class="k" style="padding-left:14px">세이프박스</span><span class="v" id="bSafe" onclick="editBudget('safebox','bSafe')" style="cursor:pointer;border-bottom:1px dashed var(--line)">0원</span></div>
       <div class="rowline" id="bAddRow" style="display:none"><span class="k">추가 예산</span><span class="v pink" id="bAdd">0원</span></div>
       <div style="margin-top:12px">
         <div class="frow">
@@ -719,6 +719,23 @@ function saveBudget(){
   if(!b||!o||!s){toast('모든 값을 입력해주세요');return}
   const m=M();m.baseBudget=b;m.operating=o;m.safebox=s;
   closeModal('budgetModal');commit();toast('예산을 저장했어요 ✓');
+}
+function editBudget(field,elId){
+  const m=M(),cur=field==='safebox'?m.safebox:m.operating;
+  const el=$(elId);if(!el)return;
+  const inp=document.createElement('input');
+  inp.type='text';inp.inputMode='numeric';inp.value=fmtN(cur);
+  inp.style.cssText='width:130px;padding:6px 10px;border:1px solid var(--accent);border-radius:8px;text-align:right;font-size:.9rem;background:#fff';
+  el.replaceWith(inp);inp.focus();inp.select();
+  inp.addEventListener('input',()=>{const v=inp.value.replace(/[^0-9]/g,'');inp.value=v?Number(v).toLocaleString('ko-KR'):''});
+  let saved=false;
+  const done=()=>{if(saved)return;saved=true;
+    const v=parseInt(inp.value.replace(/[^0-9]/g,''))||0;
+    if(field==='safebox')m.safebox=v;else m.operating=v;
+    m.baseBudget=m.operating+m.safebox;
+    commit();toast('예산을 수정했어요 ✓')};
+  inp.addEventListener('blur',done);
+  inp.addEventListener('keydown',e=>{if(e.key==='Enter')inp.blur()});
 }
 function closeModal(id){$(id).classList.remove('open')}
 
