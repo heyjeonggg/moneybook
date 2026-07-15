@@ -83,7 +83,11 @@ input,select,textarea{font-family:inherit;font-size:1rem;color:var(--ink)}
 .stats .stat:first-child{grid-column:1/-1;background:linear-gradient(135deg,rgba(255,255,255,.55),rgba(255,255,255,.3))}
 .stats .stat:first-child .vl{font-size:2.4rem;font-weight:200}
 .st-used .vl{color:var(--clay-deep)} .st-left .vl{color:var(--accent-deep)}
-.st-rate .vl{color:var(--mauve)} .st-chg .vl{color:var(--gold)}
+.st-chg .vl{color:var(--gold)}
+.hero-rate{display:flex;align-items:center;gap:10px;margin-top:12px}
+.hero-rate .bar{flex:1;height:6px;background:rgba(63,59,51,.12);border-radius:999px;overflow:hidden}
+.hero-rate .bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .5s ease}
+.hero-rate .bar i.over{background:var(--clay-deep)}
 /* rows */
 .rowline{display:flex;justify-content:space-between;align-items:center;padding:11px 0;border-bottom:1px solid var(--line);font-size:.9rem}
 .rowline:last-child{border-bottom:none}
@@ -206,12 +210,14 @@ input[type="date"]::-webkit-calendar-picker-indicator{margin-left:auto}
   <!-- ===== 홈 ===== -->
   <div id="tab-home" class="tab-content active">
     <div class="stats">
+      <div class="stat st-left">
+        <div class="lb">남은 예산</div><div class="vl" id="vLeft">0원</div>
+        <div class="hero-rate"><div class="bar"><i id="rateBar"></i></div><span class="sb" id="vRate" style="margin-top:0">0%</span></div>
+      </div>
       <div class="stat st-budget" onclick="openBudgetModal()" style="cursor:pointer">
         <div class="lb">총 예산 · 눌러서 수정</div><div class="vl" id="vTotalBudget">0원</div><div class="sb" id="vAddNote"></div>
       </div>
       <div class="stat st-used"><div class="lb">사용 금액</div><div class="vl" id="vUsed">0원</div></div>
-      <div class="stat st-left"><div class="lb">남은 예산</div><div class="vl" id="vLeft">0원</div></div>
-      <div class="stat st-rate"><div class="lb">사용률</div><div class="vl" id="vRate">0%</div></div>
       <div class="stat st-chg"><div class="lb"><span class="payname">지역페이</span> 충전</div><div class="vl" id="vPayChg">0원</div></div>
       <div class="stat st-use"><div class="lb"><span class="payname">지역페이</span> 잔액</div><div class="vl" id="vPayBal">0원</div></div>
     </div>
@@ -544,6 +550,7 @@ function renderAll(){
   $('vTotalBudget').textContent=fmt(t.budget);
   $('vAddNote').textContent=t.add>0?`(추가 ${fmt(t.add)} 포함)`:'';
   $('vUsed').textContent=fmt(t.used);$('vLeft').textContent=fmt(t.left);$('vRate').textContent=t.rate+'%';
+  const rb=$('rateBar');if(rb){rb.style.width=Math.min(t.rate,100)+'%';rb.className=t.rate>=100?'over':''}
   $('vPayChg').textContent=fmt(p.charges);$('vPayBal').textContent=fmt(p.balance);
   $('bBase').textContent=fmt(m.baseBudget);
   $('bAddRow').style.display=t.add>0?'flex':'none';$('bAdd').textContent=fmt(t.add);
