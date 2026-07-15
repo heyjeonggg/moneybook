@@ -431,6 +431,15 @@ let chart=null, chartR=null, pinBuf='', memoCtx=null, payOcrResults=[];
 
 function $(id){return document.getElementById(id)}
 function fmt(n){return new Intl.NumberFormat('ko-KR',{style:'currency',currency:'KRW',minimumFractionDigits:0}).format(n||0)}
+function fmtN(n){return n?Number(n).toLocaleString('ko-KR'):''}
+function num(id){return parseInt(($(id).value||'').replace(/[^0-9]/g,''))||0}
+function moneyInputs(){
+ ['exAmount','addAmount','carryInput','pcAmount','puAmount','mBase','mOp','mSafe'].forEach(id=>{
+   const el=$(id);if(!el)return;
+   el.type='text';el.inputMode='numeric';el.autocomplete='off';
+   el.addEventListener('input',()=>{const v=el.value.replace(/[^0-9]/g,'');el.value=v?Number(v).toLocaleString('ko-KR'):''});
+ });
+}
 function toast(msg){const t=$('toast');t.textContent=msg;t.classList.add('show');clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),2200)}
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2,7)}
 function tKey(x){return x.date+'T'+(x.time||'00:00')+'#'+(x.id||'')}
@@ -477,6 +486,7 @@ async function boot(){
 }
 function showApp(){
   $('scrPin').classList.remove('open');$('app').style.display='block';
+  moneyInputs();
   if(!curMonth)curMonth=localDate().slice(0,7);
   const today=localDate();
   $('exDate').value=today;$('pcDate').value=today;$('puDate').value=today;
@@ -544,7 +554,7 @@ function renderAll(){
   $('bAddRow').style.display=t.add>0?'flex':'none';$('bAdd').textContent=fmt(t.add);
   $('pCarry').textContent=fmt(p.carryover);$('pChg').textContent=fmt(p.charges);$('pBonus').textContent=fmt(p.bonus);
   $('pUsed').textContent=fmt(p.used);$('pBal').textContent=fmt(p.balance);
-  $('carryInput').value=m.carryover||'';
+  $('carryInput').value=fmtN(m.carryover);
   $('pinStateText').textContent=data.pinHash?'켜짐 🔒':'꺼짐';
   renderRecent(m);renderExpenses(m);renderAdditional(m);renderPayHistory(m);renderChart(m);renderReport(m);
 }
@@ -642,7 +652,7 @@ function switchTab(name,btn){
   if(name==='home'||name==='report')setTimeout(()=>renderChart(M()),30);
 }
 function addExpense(){
-  const date=$('exDate').value,amount=parseInt($('exAmount').value),
+  const date=$('exDate').value,amount=num('exAmount'),
     category=$('exCategory').value,merchant=$('exMerchant').value.trim(),source=$('exSource').value;
   if(!date||!amount||!merchant){toast('날짜·금액·상점명을 입력해주세요');return}
   M().expenses.push({id:uid(),date,amount,category,merchant,source,memo:''});
@@ -654,7 +664,7 @@ function delExpense(id){
   const m=M();m.expenses=m.expenses.filter(e=>e.id!==id);commit();
 }
 function addAdditional(){
-  const amount=parseInt($('addAmount').value),source=$('addSource').value.trim();
+  const amount=num('addAmount'),source=$('addSource').value.trim();
   if(!amount||amount<=0||!source){toast('금액과 출처를 입력해주세요');return}
   M().additional.push({id:uid(),amount,source,date:localDate()});
   $('addAmount').value='';$('addSource').value='';
@@ -665,11 +675,11 @@ function delAdditional(id){
   const m=M();m.additional=m.additional.filter(b=>b.id!==id);commit();
 }
 function saveCarry(){
-  M().carryover=parseInt($('carryInput').value)||0;commit();toast('이월 금액을 저장했어요 ✓');
+  M().carryover=num('carryInput');commit();toast('이월 금액을 저장했어요 ✓');
 }
-function quickAdd(n){const i=$('pcAmount');i.value=(parseInt(i.value)||0)+n}
+function quickAdd(n){$('pcAmount').value=fmtN(num('pcAmount')+n)}
 function addCharge(){
-  const date=$('pcDate').value,amount=parseInt($('pcAmount').value);
+  const date=$('pcDate').value,amount=num('pcAmount');
   if(!date||!amount||amount<=0){toast('날짜와 금액을 입력해주세요');return}
   if(amount%10000!==0){toast('1만원 단위로 입력해주세요');return}
   M().charges.push({id:uid(),date,amount,memo:''});
@@ -681,7 +691,7 @@ function delCharge(id){
   const m=M();m.charges=m.charges.filter(c=>c.id!==id);commit();
 }
 function addPayUse(){
-  const date=$('puDate').value,amount=parseInt($('puAmount').value),merchant=$('puMerchant').value.trim();
+  const date=$('puDate').value,amount=num('puAmount'),merchant=$('puMerchant').value.trim();
   if(!date||!amount||amount<=0||!merchant){toast('날짜·금액·사용처를 입력해주세요');return}
   M().expenses.push({id:uid(),date,amount,category:'파주페이',merchant,source:'파주페이',memo:''});
   $('puAmount').value='';$('puMerchant').value='';
@@ -701,11 +711,11 @@ function saveMemoModal(){
 }
 /* 예산 모달 */
 function openBudgetModal(){
-  const m=M();$('mBase').value=m.baseBudget;$('mOp').value=m.operating;$('mSafe').value=m.safebox;
+  const m=M();$('mBase').value=fmtN(m.baseBudget);$('mOp').value=fmtN(m.operating);$('mSafe').value=fmtN(m.safebox);
   $('budgetModal').classList.add('open');
 }
 function saveBudget(){
-  const b=parseInt($('mBase').value),o=parseInt($('mOp').value),s=parseInt($('mSafe').value);
+  const b=num('mBase'),o=num('mOp'),s=num('mSafe');
   if(!b||!o||!s){toast('모든 값을 입력해주세요');return}
   const m=M();m.baseBudget=b;m.operating=o;m.safebox=s;
   closeModal('budgetModal');commit();toast('예산을 저장했어요 ✓');
